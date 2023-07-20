@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-666jh@j0-r!vyi(v-5=+-tyadmh3w(m^(z1i=wjt!q#03=@)$9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'online-resume-watcher-6xw5.onrender.com'
+]
 
 
 # Application definition
