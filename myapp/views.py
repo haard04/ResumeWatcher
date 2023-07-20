@@ -11,8 +11,11 @@ from django.core.files.base import ContentFile
 # haardshah04 - Hh@240504
 
 def home(request):
-    return render(request, 'home.html',)
-
+    if request.method == 'POST':
+        username = request.POST.get('viewuser')
+        return redirect('/view/' + username)
+    else:
+        return render(request, 'home.html')
 def signup(request):
     if request.method =='POST':
         username= request.POST['username']
