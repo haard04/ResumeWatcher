@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload PDF</title>
+</head>
+<body>
+    <h1>Upload PDF</h1>
+    {% if user.is_authenticated %}
+        {% if pdf_instance %}
+            <a href="{% url 'view_pdf' pdf_instance.username %}" target="_blank">View PDF</a>
+            <br>
+            <form method="post" enctype="multipart/form-data" action="{% url 'save_pdf' pdf_instance.username %}">
+                {% csrf_token %}
+                <input type="hidden" name="username" value="{{ user.username }}">
+                <label for="pdf_file">Select a new PDF file:</label>
+                <input type="file" name="pdf_file" id="pdf_file" accept="application/pdf" required>
+                <br>
+                <label for="overwrite_pdf">Overwrite existing PDF?</label>
+                <input type="checkbox" name="overwrite_pdf" id="overwrite_pdf">
+                <br>
+                <input type="submit" value="Upload PDF">
+            </form>
+        {% else %}
+            <h1>NOT exist</h1>
+            <form method="post" enctype="multipart/form-data" action="{% url 'save_pdf' 'example' %}">
+                {% csrf_token %}
+                <input type="hidden" name="username" value="{{ user.username }}">
+                <label for="pdf_file">Select a PDF file:</label>
+                <input type="file" name="pdf_file" id="pdf_file" accept="application/pdf" required>
+                <br>
+                <input type="submit" value="Upload PDF">
+            </form>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

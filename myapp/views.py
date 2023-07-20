@@ -4,13 +4,14 @@ from django.contrib.auth.models import auth,User
 from django.contrib import messages
 import os
 from pathlib import Path
-
+from .models import MyModel
+from django.core.files.base import ContentFile
 # Create your views here.
 # admin --- admin
 # haardshah04 - Hh@240504
 
-def say_hello(request):  
-    return render(request,'hello.html',)
+def home(request):
+    return render(request, 'home.html',)
 
 def signup(request):
     if request.method =='POST':
@@ -46,7 +47,7 @@ def login(request):
         
         if user is not None:
             auth.login(request,user)
-            return redirect('/profile/'+username)
+            return redirect('/')
         else:
             messages.info(request,'Invalid Credentials')
             return redirect('login')
@@ -57,16 +58,65 @@ def logout(request):
     auth.logout(request)
     return redirect('/')
 
-def profile(request,username):
-    return render(request,'profile.html',{'username':username})
 
-def view_pdf(request, filename):
-    pdf_file_path = Path(__file__).resolve().parent.parent / 'pdfs' / filename
+def upload_pdf(request):
+    # Fetch the existing PDF instance for the user's username
+    pdf_instance = None
+    if request.user.is_authenticated:
+        username = request.user.username
+        pdf_instance = MyModel.objects.filter(username=username).first()
 
-    if pdf_file_path.exists() and pdf_file_path.is_file():
-        try:
-            return FileResponse(open(pdf_file_path, 'rb'), as_attachment=False, content_type='application/pdf')
-        except FileNotFoundError:
-            raise Http404
+    return render(request, 'uploadPDF.html', {'user': request.user, 'pdf_instance': pdf_instance})
+
+from django.http import HttpResponse
+from .models import MyModel
+
+def view_pdf(request, username):
+    try:
+        my_model_instance = MyModel.objects.get(username=username)
+    except MyModel.DoesNotExist:
+        return HttpResponse('PDF not found', status=404)
+
+    if my_model_instance.pdf_file:
+        response = HttpResponse(my_model_instance.pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{username}.pdf"'
+        return response
     else:
-        raise Http404
+        return HttpResponse('PDF not found', status=404)
+
+
+
+def save_pdf(request, filename):
+    if request.method == 'POST':
+        pdf_file = request.FILES.get('pdf_file')
+        if pdf_file:
+            pdf_data = pdf_file.read()
+
+            # Get the username from the form data
+            username = request.POST.get('username')
+
+            # Get the value of the 'overwrite_pdf' checkbox
+            overwrite_pdf = request.POST.get('overwrite_pdf')
+
+            # Check if a record with the same username already exists
+            pdf_instance = MyModel.objects.filter(username=username).first()
+
+            if pdf_instance and overwrite_pdf == 'on':
+                # If an existing record is found and user wants to overwrite, update it
+                pdf_instance.pdf_file = pdf_data
+                pdf_instance.save()
+            elif not pdf_instance:
+                # If no existing record is found, create a new one
+                pdf_instance = MyModel(username=username, pdf_file=pdf_data)
+                pdf_instance.save()
+
+            print("SUCCESS")
+            return redirect('/')
+
+    # Fetch the existing PDF instance for the user's username
+    pdf_instance = None
+    if request.user.is_authenticated:
+        username = request.user.username
+        pdf_instance = MyModel.objects.filter(username=username).first()
+
+    return render(request, 'uploadPDF.html', {'user': request.user, 'pdf_instance': pdf_instance})
