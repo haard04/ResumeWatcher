@@ -8,7 +8,7 @@
     {% for instance in instances %}
     <a href="{% url 'view_pdf' instance.username %}" target="_blank">{{ instance.username }}.pdf</a><br>
 {% empty %}
-    <p>No PDFs found.</p>
+    <p>No Resume found.</p>
 {% endfor %}
 
 </body>

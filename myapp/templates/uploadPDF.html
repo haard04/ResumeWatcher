@@ -66,15 +66,29 @@
         .view-link:hover {
             background-color: #555;
         }
+        .home-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .home-link a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .home-link a:hover {
+            color: #FFF;
+        }
+        .home-icon {
+            position: absolute;
+            top: 40px;
+            right: 4500px;
+            font-size: 20px;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
     <header>
-        <div class="home-icon">
-            <a href="{% url 'home' %}">
-                <img src="path/to/home-icon.png" alt="Home" width="30" height="30">
-            </a>
-        </div>
+        <a class="home-icon" href="{% url 'home' %}"><i class="fas fa-home"></i></a>
         <h1>Upload PDF</h1>
     </header>
     <div class="container">
@@ -104,7 +118,12 @@
                     <input type="submit" value="Upload PDF">
                 </form>
             {% endif %}
-        {% endif %}
+        {% else %}
+        <div class="login-link">
+            <a href="{% url 'login' %}"> Login here!</a>
+        </div>
+
+            {% endif %}
     </div>
 </body>
 </html>
