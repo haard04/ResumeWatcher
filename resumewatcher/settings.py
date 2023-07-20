@@ -21,14 +21,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-666jh@j0-r!vyi(v-5=+-tyadmh3w(m^(z1i=wjt!q#03=@)$9'
+# SECRET_KEY = 'django-insecure-666jh@j0-r!vyi(v-5=+-tyadmh3w(m^(z1i=wjt!q#03=@)$9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = TrueDEBUG = 'RENDER' not in os.environ
 ALLOWED_HOSTS = [
-    'online-resume-watcher-6xw5.onrender.com'
+    'online-resume-watcher-6xw5.onrender.com',
+    '127.0.0.1:8000',
+    '127.0.0.1'
 ]
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # Application definition

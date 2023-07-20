@@ -13,7 +13,9 @@ from django.core.files.base import ContentFile
 def home(request):
     if request.method == 'POST':
         username = request.POST.get('viewuser')
+        
         return redirect('/view/' + username)
+    
     else:
         return render(request, 'home.html')
 def signup(request):
@@ -42,6 +44,8 @@ def signup(request):
         return render(request,'signup.html')
 
 def login(request):
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print(os.path.join(BASE_DIR, 'db.sqlite3'))
     if request.method =='POST':
         username= request.POST['username']
         password= request.POST['password']
