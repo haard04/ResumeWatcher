@@ -28,7 +28,8 @@ DEBUG = TrueDEBUG = 'RENDER' not in os.environ
 ALLOWED_HOSTS = [
     'online-resume-watcher-6xw5.onrender.com',
     '127.0.0.1:8000',
-    '127.0.0.1'
+    '127.0.0.1',
+    'bmgrcaf0t7d3hwbfvtcp-mysql.services.clever-cloud.com'
 ]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -84,10 +85,10 @@ WSGI_APPLICATION = 'resumewatcher.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django',
-        'USER': 'root',
-        'PASSWORD':'password',
-        'HOST':'127.0.0.1',
+        'NAME': 'bmgrcaf0t7d3hwbfvtcp',
+        'USER': 'uojaew60jgukdwk8',
+        'PASSWORD':'zLkiIj1m0kwoBMorPtVn',
+        'HOST':'bmgrcaf0t7d3hwbfvtcp-mysql.services.clever-cloud.com',
         'PORT': '3306'
 
 
