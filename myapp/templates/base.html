@@ -35,11 +35,19 @@
 </head>
 <body>
     <div class="navbar">
-        <h1> Online Resume Watcher</h1>
+        <h1>Online Resume Watcher</h1>
         {% if user.is_authenticated %}
-            <a href="{% url 'upload_pdf' %}">Go to Profile</a>
-            <a href="{% url 'logout' %}">Logout</a>
+        {% if pdf_instance and pdf_instance.pdf_file %}
+                
+                <a href="{% url 'upload_pdf' %}">Update Resume</a>
+                <a href="{% url 'view_pdf' user.username %}">View Your Resume</a>
+                {%else%}
+                <a href="{% url 'upload_pdf' %}">Upload Resume</a>
+                {% endif %}
+           
             
+            
+            <a href="{% url 'logout' %}">Logout</a>
         {% else %}
             <a href="{% url 'login' %}">Login</a>
         {% endif %}

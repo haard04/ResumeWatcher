@@ -11,13 +11,15 @@ from django.core.files.base import ContentFile
 # haardshah04 - Hh@240504
 
 def home(request):
+    pdf_instance = MyModel.objects.filter(username=request.user.username).first()
+    
     if request.method == 'POST':
         username = request.POST.get('viewuser')
-        
         return redirect('/view/' + username)
-    
     else:
-        return render(request, 'home.html')
+        return render(request, 'home.html', {'pdf_instance': pdf_instance})
+    
+    
 def signup(request):
     if request.method =='POST':
         username= request.POST['username']
