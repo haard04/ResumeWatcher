@@ -88,8 +88,15 @@
 </head>
 <body>
     <header>
+    {% if user.is_authenticated %}
+            {% if pdf_instance %}
         <a class="home-icon" href="{% url 'home' %}"><i class="fas fa-home"></i></a>
-        <h1>Upload PDF</h1>
+        <h1>Update Resume</h1>
+        {%else%}
+        <a class="home-icon" href="{% url 'home' %}"><i class="fas fa-home"></i></a>
+        <h1>Upload Resume</h1>
+        {% endif %}
+    {% endif %}
     </header>
     <div class="container">
         {% if user.is_authenticated %}
