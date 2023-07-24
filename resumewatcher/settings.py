@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -85,10 +88,10 @@ WSGI_APPLICATION = 'resumewatcher.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bmgrcaf0t7d3hwbfvtcp',
-        'USER': 'uojaew60jgukdwk8',
-        'PASSWORD':'zLkiIj1m0kwoBMorPtVn',
-        'HOST':'bmgrcaf0t7d3hwbfvtcp-mysql.services.clever-cloud.com',
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD':os.getenv("PASSWORD"),
+        'HOST':os.getenv("HOST"),
         'PORT': '3306'
 
 
