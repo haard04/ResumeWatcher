@@ -98,7 +98,18 @@ DATABASES = {
     }
 }
 
-
+try:
+    import pymysql
+    pymysql.connect(
+        host=os.getenv("HOST"),
+        user=os.getenv("USER"),
+        password=os.getenv("PASSWORD"),
+        db=os.getenv("NAME"),
+        port=3306,
+    )
+    print("Database connection successful!")
+except Exception as e:
+    print(f"Database connection failed: {e}")
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
