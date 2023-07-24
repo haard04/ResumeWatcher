@@ -110,7 +110,7 @@ try:
     print("Database connection successful!")
     print(os.getenv("HOST")+' '+os.getenv("USER")+' '+os.getenv("PASSWORD")+' '+os.getenv("NAME"))
 except Exception as e:
-    print(os.getenv("HOST")+' '+os.getenv("USER")+' '+os.getenv("PASSWORD")+' '+os.getenv("NAME"))
+    print(os.getenv("HOST"))
     print(f"Database connection failed: {e}")
     
 # Password validation
