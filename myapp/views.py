@@ -6,9 +6,7 @@ import os
 from pathlib import Path
 from .models import MyModel
 from django.core.files.base import ContentFile
-# Create your views here.
-# admin --- admin
-# haardshah04 - Hh@240504
+
 
 def home(request):
     pdf_instance = MyModel.objects.filter(username=request.user.username).first()
