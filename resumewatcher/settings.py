@@ -108,8 +108,11 @@ try:
         port=3306,
     )
     print("Database connection successful!")
+    print(os.getenv("HOST")+' '+os.getenv("USER")+' '+os.getenv("PASSWORD")+' '+os.getenv("NAME"))
 except Exception as e:
+    print(os.getenv("HOST")+' '+os.getenv("USER")+' '+os.getenv("PASSWORD")+' '+os.getenv("NAME"))
     print(f"Database connection failed: {e}")
+    
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
