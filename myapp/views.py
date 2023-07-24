@@ -10,12 +10,15 @@ from django.core.files.base import ContentFile
 
 def home(request):
     pdf_instance = MyModel.objects.filter(username=request.user.username).first()
+    view_count = pdf_instance.view_count if pdf_instance else 0
+
+    
     
     if request.method == 'POST':
         username = request.POST.get('viewuser')
         return redirect('/view/' + username)
     else:
-        return render(request, 'home.html', {'pdf_instance': pdf_instance})
+        return render(request, 'home.html', {'pdf_instance': pdf_instance,'view_count': view_count})
     
     
 def signup(request):
@@ -83,6 +86,9 @@ def view_pdf(request, username):
         my_model_instance = MyModel.objects.get(username=username)
     except MyModel.DoesNotExist:
         return HttpResponse('PDF not found', status=404)
+    
+    my_model_instance.view_count += 1
+    my_model_instance.save()
 
     if my_model_instance.pdf_file:
         response = HttpResponse(my_model_instance.pdf_file, content_type='application/pdf')

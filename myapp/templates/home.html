@@ -11,6 +11,8 @@
 {% block content %}
     {% if user.is_authenticated %}
     <h2>Welcome to Online Resume Watcher, {{user.username}}</h2>
+    <p>Your Resume View Count: {{ view_count }}</p> 
+    <p>View Count in the Last 7 Days: {{ view_count_last_7_days }}</p> 
     {%else%}
     <h2>Welcome to Online Resume Watcher !</h2>
     {%endif%}
