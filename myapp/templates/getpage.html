@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details</title>
+</head>
+
+<body>
+    <h1>Job Details</h1>
+    <div id="jobList"></div>
+
+    <script>
+        // Function to fetch job details via GET request
+        function fetchJobDetails() {
+            // Fetch user ID from Django template context
+            const user_id = {{ USER_ID|safe }};
+    
+            // Fetch job details via GET request
+            fetch(`/get_all_jobs/${user_id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any additional headers if required
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the obtained job details (data) here
+                displayJobDetails(data.jobs);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Function to display job details on the webpage
+        function displayJobDetails(jobs) {
+            const jobListDiv = document.getElementById('jobList');
+            jobListDiv.innerHTML = ''; // Clear previous job details
+
+            if (jobs.length === 0) {
+                jobListDiv.innerHTML = '<p>No jobs available.</p>';
+            } else {
+                const ul = document.createElement('ul');
+                jobs.forEach(job => {
+                    const li = document.createElement('li');
+                    li.textContent = `Job ID: ${job.job_id}, Role: ${job.role}, Company: ${job.company_name}, Location: ${job.location}, Stipend Amount: ${job.stipend_amount}, Application No: ${job.application_no}, Application Date: ${job.application_date}, Status: ${job.status}, Job Link: ${job.job_link}, Referred By: ${job.referred_by}`;
+                    ul.appendChild(li);
+                });
+                jobListDiv.appendChild(ul);
+            }
+        }
+
+        // Fetch job details when the page loads
+        window.onload = function() {
+            fetchJobDetails();
+        };
+    </script>
+</body>
+
+</html>

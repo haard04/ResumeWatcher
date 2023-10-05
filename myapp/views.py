@@ -1,10 +1,10 @@
-from django.shortcuts import render,redirect
-from django.http import HttpResponse,FileResponse,Http404
+from django.shortcuts import render,redirect,get_object_or_404
+from django.http import HttpResponse,FileResponse,Http404,JsonResponse
 from django.contrib.auth.models import auth,User
 from django.contrib import messages
 import os
 from pathlib import Path
-from .models import MyModel
+from .models import MyModel,Job
 from django.core.files.base import ContentFile
 
 
@@ -133,3 +133,80 @@ def save_pdf(request, filename):
         pdf_instance = MyModel.objects.filter(username=username).first()
 
     return render(request, 'uploadPDF.html', {'user': request.user, 'pdf_instance': pdf_instance})
+
+def jobform(request):
+    user_id = request.user.id
+    return render(request,'createjob.html',{'user_id': user_id})
+
+
+def add_job_to_profile(request, user_id):
+    user = get_object_or_404(MyModel, pk=user_id)
+
+    if request.method == 'POST':
+        # Retrieve job details from POST data
+        role = request.POST.get('role')
+        company_name = request.POST.get('company_name')
+        location = request.POST.get('location')
+        stipend_amount = request.POST.get('stipend_amount')
+        application_no = request.POST.get('application_no')
+        application_date = request.POST.get('application_date')
+        status = request.POST.get('status')
+        job_link = request.POST.get('job_link')
+        referred_by = request.POST.get('referred_by')
+
+        # Create a new job instance
+        job = Job.objects.create(
+            role=role,
+            company_name=company_name,
+            location=location,
+            stipend_amount=stipend_amount,
+            application_no=application_no,
+            application_date=application_date,
+            status=status,
+            job_link=job_link,
+            referred_by=referred_by
+        )
+
+        # Associate the job with the user
+        user.job_ids.add(job)
+
+        # Save both user and job objects
+        user.save()
+        job.save()
+
+        return JsonResponse({'message': 'Job successfully added to the user profile.'})
+
+    return JsonResponse({'message': 'Invalid request method.'})
+
+def get_all_jobs(request, user_id):
+    # Get the MyModel instance based on user ID
+    user_instance = get_object_or_404(MyModel, pk=user_id)
+
+    # Fetch jobs associated with the user using subquery
+    jobs = Job.objects.filter(job_id__in=user_instance.job_ids.values('job_id'))
+
+    # Create a list to store job details
+    jobs_array = []
+    for job in jobs:
+        job_data = {
+            'job_id': job.job_id,
+            'role': job.role,
+            'company_name': job.company_name,
+            'location': job.location,
+            'stipend_amount': str(job.stipend_amount),
+            'application_no': job.application_no,
+            'application_date': job.application_date.strftime('%Y-%m-%d'),
+            'status': job.status,
+            'job_link': job.job_link,
+            'referred_by': job.referred_by
+        }
+        jobs_array.append(job_data)
+
+        print(jobs_array)
+
+    return JsonResponse({'jobs': jobs_array})
+
+
+def getpage(request):
+    user_id = request.user.id
+    return render(request,'getpage.html',{'USER_ID': user_id})
