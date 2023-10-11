@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from django.http import HttpResponse,FileResponse,Http404,JsonResponse
+from django.http import HttpResponse,FileResponse,Http404,JsonResponse,HttpResponseBadRequest
 from django.contrib.auth.models import auth,User
 from django.contrib import messages
 import os
@@ -148,7 +148,7 @@ def add_job_to_profile(request, user_id):
         company_name = request.POST.get('company_name')
         location = request.POST.get('location')
         stipend_amount = request.POST.get('stipend_amount')
-        application_no = request.POST.get('application_no')
+        job_type = request.POST.get('job_type')
         application_date = request.POST.get('application_date')
         status = request.POST.get('status')
         job_link = request.POST.get('job_link')
@@ -160,7 +160,7 @@ def add_job_to_profile(request, user_id):
             company_name=company_name,
             location=location,
             stipend_amount=stipend_amount,
-            application_no=application_no,
+            job_type=job_type,
             application_date=application_date,
             status=status,
             job_link=job_link,
@@ -194,7 +194,7 @@ def get_all_jobs(request, user_id):
             'company_name': job.company_name,
             'location': job.location,
             'stipend_amount': str(job.stipend_amount),
-            'application_no': job.application_no,
+            'job_type': job.job_type,
             'application_date': job.application_date.strftime('%Y-%m-%d'),
             'status': job.status,
             'job_link': job.job_link,
@@ -210,3 +210,57 @@ def get_all_jobs(request, user_id):
 def getpage(request):
     user_id = request.user.id
     return render(request,'getpage.html',{'USER_ID': user_id})
+
+def update_job(request, job_id):
+    job = get_object_or_404(Job, pk=job_id)
+    
+    if request.method == 'POST':
+        # Retrieve updated job details from POST data
+        role = request.POST.get('role')
+        company_name = request.POST.get('company_name')
+        location = request.POST.get('location')
+        stipend_amount = request.POST.get('stipend_amount')
+        job_type = request.POST.get('job_type')
+        application_date = request.POST.get('application_date')
+        status = request.POST.get('status')
+        job_link = request.POST.get('job_link')
+        referred_by = request.POST.get('referred_by')
+        
+        # Update the job instance
+        job.role = role
+        job.company_name = company_name
+        job.location = location
+        job.stipend_amount = stipend_amount
+        job.job_type = job_type
+        job.application_date = application_date
+        job.status = status
+        job.job_link = job_link
+        job.referred_by = referred_by
+        
+        # Save the updated job object
+        job.save()
+        
+        return JsonResponse({'message': 'Job successfully updated.'})
+    
+    return HttpResponseBadRequest('Invalid request method.')
+
+def delete_job(request, job_id):
+    job = get_object_or_404(Job, pk=job_id)
+    job.delete()
+    return JsonResponse({'message': 'Job successfully deleted.'})
+
+def get_job_by_id(request, job_id):
+    job = get_object_or_404(Job, pk=job_id)
+    job_data = {
+        'job_id': job.job_id, 
+        'role': job.role,
+        'company_name': job.company_name,
+        'location': job.location,
+        'stipend_amount': str(job.stipend_amount),
+        'job_type': job.job_type,
+        'application_date': job.application_date.strftime('%Y-%m-%d'),
+        'status': job.status,
+        'job_link': job.job_link,
+        'referred_by': job.referred_by
+    }
+    return JsonResponse({'job': job_data})

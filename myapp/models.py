@@ -7,7 +7,7 @@ class Job(models.Model):
     company_name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     stipend_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    application_no = models.CharField(max_length=50)
+    job_type = models.CharField(max_length=50)
     application_date = models.DateField()
     status = models.CharField(max_length=50)
     job_link = models.URLField()

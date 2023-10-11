@@ -46,7 +46,7 @@
                 const ul = document.createElement('ul');
                 jobs.forEach(job => {
                     const li = document.createElement('li');
-                    li.textContent = `Job ID: ${job.job_id}, Role: ${job.role}, Company: ${job.company_name}, Location: ${job.location}, Stipend Amount: ${job.stipend_amount}, Application No: ${job.application_no}, Application Date: ${job.application_date}, Status: ${job.status}, Job Link: ${job.job_link}, Referred By: ${job.referred_by}`;
+                    li.textContent = `Job ID: ${job.job_id}, Role: ${job.role}, Company: ${job.company_name}, Location: ${job.location}, Stipend Amount: ${job.stipend_amount}, Application No: ${job.job_type}, Application Date: ${job.application_date}, Status: ${job.status}, Job Link: ${job.job_link}, Referred By: ${job.referred_by}`;
                     ul.appendChild(li);
                 });
                 jobListDiv.appendChild(ul);

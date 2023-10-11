@@ -12,7 +12,10 @@ urlpatterns = [
     path('jobpage',views.jobform,name='jobform'),
     path('add_job_to_profile/<int:user_id>/', views.add_job_to_profile, name='add_job_to_profile'),
     path('get_all_jobs/<int:user_id>/', views.get_all_jobs, name='get_all_jobs'),
-    path('getpage',views.getpage,name='getpage')
+    path('getpage',views.getpage,name='getpage'),
+    path('updatejob/<int:job_id>/', views.update_job, name='update_job'),
+    path('deletejob/<int:job_id>/', views.delete_job, name='delete_job'),
+    path('getjob/<int:job_id>/', views.get_job_by_id, name='get_job_by_id'),
 ] 
 
 
