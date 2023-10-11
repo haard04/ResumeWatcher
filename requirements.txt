@@ -3,3 +3,4 @@ gunicorn
 mysqlclient
 python-dotenv
 pymysql
+django-cors-headers
