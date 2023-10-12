@@ -4,3 +4,4 @@ mysqlclient
 python-dotenv
 pymysql
 django-cors-headers
+PyPDF2

@@ -6,6 +6,12 @@ import os
 from pathlib import Path
 from .models import MyModel,Job
 from django.core.files.base import ContentFile
+import PyPDF2
+import re
+import json
+import io
+
+
 
 
 def home(request):
@@ -264,3 +270,48 @@ def get_job_by_id(request, job_id):
         'referred_by': job.referred_by
     }
     return JsonResponse({'job': job_data})
+
+def matchskill(request):
+    Skills = ["Python", "Java", "R", "JavaScript", "SQL", "HTML", "CSS", "Machine Learning", "TensorFlow", "Pandas", "Seaborn"]
+    Required_skills = ["Python", "R", "TensorFlow"]
+    matched_words = {'skills': []}
+
+    def search_pdf_for_words(pdf_file, words):
+
+        pdf_file.seek(0)
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+            
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            text = page.extract_text()
+
+            for word in words:
+                # Use regex for case-insensitive search
+                pattern = re.compile(re.escape(word), re.IGNORECASE)
+                if re.search(pattern, text):
+                    if word not in matched_words['skills']:
+                        matched_words['skills'].append(word)
+
+    username = request.user.username
+
+    # Fetch the PDF file path from the MyModel instance
+    pdf_instance = MyModel.objects.filter(username=username).first()
+
+        
+    if pdf_instance and pdf_instance.pdf_file:
+        pdf_file_data = pdf_instance.pdf_file
+        pdf_file_bytes = io.BytesIO(pdf_file_data)  # Convert bytes data to a file-like object
+        search_pdf_for_words(pdf_file_bytes, Skills)
+        
+       
+        matching_skills = list(set(matched_words['skills']) & set(Required_skills))
+        percentage_matched = (len(matching_skills) / len(Required_skills)) * 100
+        
+
+        print("Skills in Resume: ", matched_words)
+        print("Skills that match with required skills:", matching_skills)
+        print(f"{percentage_matched:.2f}% of required skills are matched")
+    else:
+        print("PDF not found for the user.")
+    return render(request,'hello.html') # matched_words,matching_skills,percentage_matched
+
