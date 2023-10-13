@@ -5,3 +5,5 @@ python-dotenv
 pymysql
 django-cors-headers
 PyPDF2
+djangorestframework
+nltk
