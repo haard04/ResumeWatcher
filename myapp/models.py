@@ -12,6 +12,7 @@ class Job(models.Model):
     status = models.CharField(max_length=50)
     job_link = models.URLField()
     referred_by = models.CharField(max_length=100)  # Referred by user's name
+    
 
 class MyModel(models.Model):
     username = models.CharField(max_length=100, default='')

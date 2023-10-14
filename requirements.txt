@@ -7,3 +7,4 @@ django-cors-headers
 PyPDF2
 djangorestframework
 nltk
+PyJWT
