@@ -32,11 +32,6 @@ def home(request):
 #         return redirect('/view/' + username)
 #     else:
 #         return render(request, 'home.html', {'pdf_instance': pdf_instance,'view_count': view_count})
-#     if request.method == 'POST':
-#         username = request.POST.get('viewuser')
-#         return redirect('/view/' + username)
-#     else:
-#         return render(request, 'home.html', {'pdf_instance': pdf_instance,'view_count': view_count})
     
 @api_view(['POST'])
 def signup(request):
@@ -176,7 +171,6 @@ def getUserData(request):
 #     return render(request, 'uploadPDF.html', {'user': request.user, 'pdf_instance': pdf_instance})
 
 
-
 # @api_view(['GET'])
 # def view_pdf(request, username):
 #     try:
@@ -193,7 +187,6 @@ def getUserData(request):
 #         return response
 #     else:
 #         return HttpResponse('PDF not found', status=404)
-
 
 # @api_view(['POST'])
 # def save_pdf(request, filename):
@@ -355,7 +348,7 @@ def get_all_jobs(request):
     if not jobs_array:
         return JsonResponse({'jobs': []})
 
-#     return render(request,"job-list.tsx")
+    return JsonResponse({'jobs': jobs_array})
 
 # def getpage(request):
 #     user_id = request.user.id
@@ -404,10 +397,10 @@ def update_job(request, job_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# def delete_job(request, job_id):
-#     job = get_object_or_404(Job, pk=job_id)
-#     job.delete()
-#     return JsonResponse({'message': 'Job successfully deleted.'})
+def delete_job(request, job_id):
+    job = get_object_or_404(Job, pk=job_id)
+    job.delete()
+    return JsonResponse({'message': 'Job successfully deleted.'})
 
 @api_view(['GET'])
 def get_job_by_id(request, job_id):
@@ -478,7 +471,6 @@ def matchskill(request):
         'percentage_matched': percentage_matched
     }
     return Response(response_data)
-
 
 def getskillsfromdesc(jobdesc):
     # Define a list of common skills
