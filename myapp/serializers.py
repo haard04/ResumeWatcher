@@ -1,13 +1,12 @@
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import MyModel,Job
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email')  # Include any other fields you want to expose
-
 
 
 class MyModelSerializer(serializers.ModelSerializer):

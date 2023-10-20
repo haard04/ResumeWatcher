@@ -20,7 +20,8 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 
-# def home(request):
+def home(request):
+    return render(request,'home.html')
 #     pdf_instance = MyModel.objects.filter(username=request.user.username).first()
 #     view_count = pdf_instance.view_count if pdf_instance else 0
 
@@ -94,41 +95,58 @@ def get_logged_in_user(request):
     }
     return Response(response_data)
 
+from django.core.files.base import ContentFile
+from django.db import transaction
+from django.core.files.uploadedfile import InMemoryUploadedFile
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_pdf(request):
-    username = request.user.username
-    pdf_file = request.data.get('pdf_file')
-    overwrite_pdf = request.data.get('overwrite_pdf', False)
+    try:
+        username = request.user.username
+        pdf_file = request.data.get('pdf_file')
+        overwrite_pdf = request.data.get('overwrite_pdf', False)
+        pdf_instance = None
 
-    # Check if a record with the same username already exists
-    pdf_instance = MyModel.objects.filter(username=username).first()
+        # Ensure that pdf_file is a bytes object
+        if isinstance(pdf_file, bytes):
+            with transaction.atomic():
+                # Check if a record with the same username already exists
+                pdf_instance = MyModel.objects.filter(username=username).first()
 
-    if pdf_instance and overwrite_pdf:
-        # If an existing record is found and user wants to overwrite, update it
-        pdf_instance.pdf_file = pdf_file
-        pdf_instance.save()
-    elif not pdf_instance:
-        # If no existing record is found, create a new one
-        pdf_instance = MyModel(username=username, pdf_file=pdf_file)
-        pdf_instance.save()
+                # Get the filename from the request or use a default name like 'file.pdf'
+                filename = request.data.get('filename', 'file.pdf')
 
-    serializer = MyModelSerializer(pdf_instance)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                if pdf_instance and overwrite_pdf:
+                    # If an existing record is found and the user wants to overwrite, update it
+                    pdf_instance.pdf_file.save(filename, ContentFile(pdf_file))
+                elif not pdf_instance:
+                    # If no existing record is found, create a new one
+                    pdf_instance = MyModel(username=username)
+                    pdf_instance.pdf_file.save(filename, ContentFile(pdf_file))
+                    pdf_instance.save()
+
+        if pdf_instance:
+            serializer = MyModelSerializer(pdf_instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': 'Failed to upload PDF file.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def getPDF(request, username):
     try:
         pdf_instance = MyModel.objects.filter(username=username).first()
-        if pdf_instance is not None:
-            serializer = MyModelSerializer(pdf_instance)
-            return Response(serializer.data['pdf_file'])
+        if pdf_instance is not None and pdf_instance.pdf_file:
+            # Assuming pdf_file is a FileField or ImageField in your MyModel
+            pdf_file_content = pdf_instance.pdf_file.read()
+            return Response(pdf_file_content, content_type='application/pdf')
         else:
             return Response({'error': 'PDF not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserData(request):
@@ -153,7 +171,6 @@ def getUserData(request):
 #     return render(request, 'uploadPDF.html', {'user': request.user, 'pdf_instance': pdf_instance})
 
 
-
 # @api_view(['GET'])
 # def view_pdf(request, username):
 #     try:
@@ -170,7 +187,6 @@ def getUserData(request):
 #         return response
 #     else:
 #         return HttpResponse('PDF not found', status=404)
-
 
 # @api_view(['POST'])
 # def save_pdf(request, filename):
@@ -250,59 +266,67 @@ def getUserData(request):
 
 #         return JsonResponse({'message': 'Job successfully added to the user profile.'})
 #CHANGE HERRE
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])  # Ensure the user is authenticated
+from django.contrib.auth.decorators import login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+@login_required
+@csrf_exempt # Ensure the user is authenticated
 def add_job_to_profile(request):
-    return None
-#     # Get the authenticated user's MyModel instance
-#     user = get_object_or_404(MyModel, user=request.user)
+    
+    # Get the authenticated user's MyModel instance
+    username = request.user.username
+    user = get_object_or_404(MyModel, username=username)
 
-#     if request.method == 'POST':
-#         # Retrieve job details from POST data
-#         role = request.POST.get('role')
-#         company_name = request.POST.get('company_name')
-#         location = request.POST.get('location')
-#         stipend_amount = request.POST.get('stipend_amount')
-#         job_type = request.POST.get('job_type')
-#         application_date = request.POST.get('application_date')
-#         status = request.POST.get('status')
-#         job_link = request.POST.get('job_link')
-#         referred_by = request.POST.get('referred_by')
+    if request.method == 'POST':
+        # Retrieve job details from POST data
+        role = request.data.get('role')
+        company_name = request.data.get('company_name')
+        location = request.data.get('location')
+        stipend_amount = request.data.get('stipend_amount')
+        job_type = request.data.get('job_type')
+        application_date = request.data.get('application_date')
+        status = request.data.get('status')
+        job_link = request.data.get('job_link')
+        referred_by = request.data.get('referred_by')
 
-#         # Create a new Job instance in the myapp_job table
-#         job = Job.objects.create(
-#             role=role,
-#             company_name=company_name,
-#             location=location,
-#             stipend_amount=stipend_amount,
-#             job_type=job_type,
-#             application_date=application_date,
-#             status=status,
-#             job_link=job_link,
-#             referred_by=referred_by
-#         )
+        # Create a new Job instance in the myapp_job table
+        job = Job.objects.create(
+            role=role,
+            company_name=company_name,
+            location=location,
+            stipend_amount=stipend_amount,
+            job_type=job_type,
+            application_date=application_date,
+            status=status,
+            job_link=job_link,
+            referred_by=referred_by
+        )
 
-#         # Add the Job ID to myapp_mymodel_job_ids table
-#         user.job_ids.add(job)
+        # Add the Job ID to myapp_mymodel_job_ids table
+        user.job_ids.add(job)
 
-# #         # Save both user and job objects
-#         # user.save()
-#         # job.save()
-#         return JsonResponse({'message': 'Job successfully added to the user profile.'})
-#     else:
-#         # Handle other HTTP methods if needed
-#         return JsonResponse({'message': 'Invalid request method.'}, status=400)
+#         # Save both user and job objects
+        # user.save()
+        # job.save()
+        return JsonResponse({'message': 'Job successfully added to the user profile.'})
+    else:
+        # Handle other HTTP methods if needed
+        return JsonResponse({'message': 'Invalid request method.'}, status=400)
 
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Job, MyModel
 
 @api_view(['GET'])
 def get_all_jobs(request):
-    user_id=request.user.id
+    user_id = request.user.id
+    username = request.user.username
     # Get the MyModel instance based on user ID
-    user_instance = get_object_or_404(MyModel, pk=user_id)
-
+    user_instance = get_object_or_404(MyModel, username=username)
+    print(user_instance.job_ids)
     # Fetch jobs associated with the user using subquery
     jobs = Job.objects.filter(job_id__in=user_instance.job_ids.values('job_id'))
-
+    print(len(jobs))
     # Create a list to store job details
     jobs_array = []
     for job in jobs:
@@ -313,17 +337,18 @@ def get_all_jobs(request):
             'location': job.location,
             'stipend_amount': str(job.stipend_amount),
             'job_type': job.job_type,
-            'application_date': job.application_date.strftime('%Y-%m-%d'),
+            'application_date': job.application_date.isoformat(),  # Serialize datetime to ISO format
             'status': job.status,
             'job_link': job.job_link,
             'referred_by': job.referred_by
         }
         jobs_array.append(job_data)
 
-        print(jobs_array)
+    # Check if there are jobs, if not, return an empty array
+    if not jobs_array:
+        return JsonResponse({'jobs': []})
 
     return JsonResponse({'jobs': jobs_array})
-
 
 # def getpage(request):
 #     user_id = request.user.id
@@ -446,7 +471,6 @@ def matchskill(request):
         'percentage_matched': percentage_matched
     }
     return Response(response_data)
-
 
 def getskillsfromdesc(jobdesc):
     # Define a list of common skills
