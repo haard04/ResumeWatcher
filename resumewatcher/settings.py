@@ -91,37 +91,34 @@ WSGI_APPLICATION = 'resumewatcher.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     # 'ENGINE': 'django.db.backends.mysql',
-    #     # 'NAME': os.getenv("NAME"),
-    #     # 'USER': os.getenv("USER"),
-    #     # 'PASSWORD':os.getenv("PASSWORD"),
-    #     # 'HOST':os.getenv("HOST"),
-    #     # 'PORT': '3306'
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD':os.getenv("PASSWORD"),
+        'HOST':os.getenv("HOST"),
+        'PORT': '3306'
         
 
 
-    # }
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # Path to your SQLite database file
     }
+    
 }
 
-# try:
-#     import pymysql
-#     pymysql.connect(
-#         host=os.getenv("HOST"),
-#         user=os.getenv("USER"),
-#         password=os.getenv("PASSWORD"),
-#         db=os.getenv("NAME"),
-#         port=3306,
-#     )
-#     print("Database connection successful!")
-#     print(os.getenv("HOST")+' '+os.getenv("USER")+' '+os.getenv("PASSWORD")+' '+os.getenv("NAME"))
-# except Exception as e:
-#     print(os.getenv("HOST"))
-#     print(f"Database connection failed: {e}")
+try:
+    import pymysql
+    pymysql.connect(
+        host=os.getenv("HOST"),
+        user=os.getenv("USER"),
+        password=os.getenv("PASSWORD"),
+        db=os.getenv("NAME"),
+        port=3306,
+    )
+    print("Database connection successful!")
+    print(os.getenv("HOST")+' '+os.getenv("USER")+' '+os.getenv("PASSWORD")+' '+os.getenv("NAME"))
+except Exception as e:
+    print(os.getenv("HOST"))
+    print(f"Database connection failed: {e}")
     
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
