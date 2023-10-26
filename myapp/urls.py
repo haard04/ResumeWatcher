@@ -31,5 +31,7 @@ urlpatterns = [
     path('getJobbyId/<int:job_id>',views.get_job_by_id,name='get_job_by_id'),
     path('matchSkills',views.matchskill,name='matchskill'),
     path('updatejob/<int:job_id>', views.update_job, name='update_job'),
+    path('report-job/', views.report_job, name='report_job'),
+    path('getJobopportunities',views.get_all_active_jobs,name='get_all_active_jobs')
 ] 
 

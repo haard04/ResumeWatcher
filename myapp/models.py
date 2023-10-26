@@ -19,3 +19,8 @@ class MyModel(models.Model):
     pdf_file = models.BinaryField()
     view_count = models.PositiveIntegerField(default=0)
     job_ids = models.ManyToManyField(Job, blank=True)  # Many-to-many relationship with Job model
+
+class activeJobs(models.Model):
+    job_id = models.ForeignKey('Job', on_delete=models.CASCADE)
+    reports = models.IntegerField(default=0)
+    link= models.URLField(primary_key=True)

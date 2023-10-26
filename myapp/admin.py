@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import MyModel
+from .models import MyModel,activeJobs
 
 # Register your models here.
 admin.site.register(MyModel)
@@ -12,3 +12,5 @@ class JobAdmin(admin.ModelAdmin):
 
 # Register the Job model with its admin class
 admin.site.register(Job, JobAdmin)
+
+admin.site.register(activeJobs)

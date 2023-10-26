@@ -4,7 +4,7 @@ from django.contrib.auth.models import auth,User
 from django.contrib import messages
 import os
 from pathlib import Path
-from .models import MyModel,Job
+from .models import MyModel,Job,activeJobs
 from django.core.files.base import ContentFile
 import PyPDF2
 import re
@@ -305,6 +305,15 @@ def add_job_to_profile(request):
         # Add the Job ID to myapp_mymodel_job_ids table
         user.job_ids.add(job)
 
+        if activeJobs.objects.filter(link=job_link).exists():
+            return JsonResponse({'error': 'Job link already exists.'}, status=205)
+        active_job = activeJobs.objects.create(
+            job_id=job,
+            reports=0,
+            link=job_link
+        )
+
+
 #         # Save both user and job objects
         # user.save()
         # job.save()
@@ -492,3 +501,48 @@ def getskillsfromdesc(jobdesc):
     # Print the extracted skills
     return extracted_skills
 
+from django.shortcuts import get_object_or_404
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+@login_required
+@csrf_exempt
+def report_job(request):
+
+    if request.method == 'POST':
+        job_link = request.data.get('job_link')
+
+        active_job = get_object_or_404(activeJobs, link=job_link)
+
+        active_job.reports += 1
+        active_job.save()
+
+
+        if active_job.reports >= 5:
+            active_job.delete()
+            return JsonResponse({'message': 'Job reported and deleted successfully.'})
+
+        return JsonResponse({'message': 'Job reported successfully.'})
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=400)
+    
+def get_all_active_jobs(request):
+    active_jobs = activeJobs.objects.all()
+    active_jobs_list = []
+    for job in active_jobs:
+        job_data = {
+            'job_id': job.job_id.job_id,
+            'role': job.job_id.role,
+            'company_name': job.job_id.company_name,
+            'location': job.job_id.location,
+            'stipend_amount': str(job.job_id.stipend_amount),
+            'job_type': job.job_id.job_type,
+            'application_date': job.job_id.application_date.strftime('%Y-%m-%d'),
+            'status': job.job_id.status,
+            'job_link': job.job_id.job_link,
+            'referred_by': job.job_id.referred_by,
+            'reports': job.reports
+        }
+        active_jobs_list.append(job_data)
+    return JsonResponse({'active_jobs': active_jobs_list})
