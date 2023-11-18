@@ -32,7 +32,8 @@ ALLOWED_HOSTS = [
     'online-resume-watcher-6xw5.onrender.com',
     '127.0.0.1:8000',
     '127.0.0.1',
-    'bmgrcaf0t7d3hwbfvtcp-mysql.services.clever-cloud.com'
+    'bmgrcaf0t7d3hwbfvtcp-mysql.services.clever-cloud.com',
+    'localhost'
 ]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -63,7 +64,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3001",  # or your Next.js frontend URL
+    "http://localhost:3000",  # or your Next.js frontend URL
 ]
 
 ROOT_URLCONF = 'resumewatcher.urls'
