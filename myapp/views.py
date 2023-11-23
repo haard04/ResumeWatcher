@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse,FileResponse,Http404,JsonResponse,HttpResponseBadRequest
 from django.contrib.auth.models import auth,User
 from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login
 import os
 from pathlib import Path
 from .models import MyModel,Job,activeJobs
@@ -18,7 +19,7 @@ import datetime
 from .serializers import UserSerializer,MyModelSerializer,JobSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework import status
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt,csrf_protect
 
 def home(request):
     return render(request,'home.html')
@@ -57,22 +58,23 @@ def signup(request):
             return JsonResponse({'error': 'Password Does not match'}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-@csrf_exempt    
-@api_view(['POST'])
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
 
-        user = auth.authenticate(username=username, password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            auth.login(request, user)
-            # Generate JWT token
-            token = jwt.encode({'user_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)}, None, algorithm=None)
-            return JsonResponse({'token': token})
-        else: 
+            auth_login(request, user)  # Use auth_login instead of auth.login
+
+            # You can access the sessionid like this
+            sessionid = request.session.session_key
+
+            return JsonResponse({'message': 'Login successful', 'sessionid': sessionid})
+        else:
             return JsonResponse({'error': 'Invalid Credentials'}, status=401)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
@@ -268,13 +270,16 @@ def getUserData(request):
 #CHANGE HERRE
 from django.contrib.auth.decorators import login_required
 @api_view(['POST'])
-@permission_classes([IsAuthenticated]) 
-@login_required
-@csrf_exempt # Ensure the user is authenticated
+# @permission_classes([IsAuthenticated]) 
+# @login_required
+@csrf_exempt
 def add_job_to_profile(request):
-    
+    session_id = request.COOKIES.get('sessionid')
+    print(session_id)
+    print('request recieved')
     # Get the authenticated user's MyModel instance
     username = request.user.username
+    print(username)
     user = get_object_or_404(MyModel, username=username)
 
     if request.method == 'POST':
@@ -288,7 +293,7 @@ def add_job_to_profile(request):
         status = request.data.get('status')
         job_link = request.data.get('job_link')
         referred_by = request.data.get('referred_by')
-
+        print(request.data.get('role'))
         # Create a new Job instance in the myapp_job table
         job = Job.objects.create(
             role=role,
@@ -304,7 +309,7 @@ def add_job_to_profile(request):
 
         # Add the Job ID to myapp_mymodel_job_ids table
         user.job_ids.add(job)
-
+        print('created')
         if activeJobs.objects.filter(link=job_link).exists():
             return JsonResponse({'error': 'Job link already exists.'}, status=205)
         active_job = activeJobs.objects.create(
@@ -317,25 +322,51 @@ def add_job_to_profile(request):
 #         # Save both user and job objects
         # user.save()
         # job.save()
-        return JsonResponse({'message': 'Job successfully added to the user profile.'})
+        return JsonResponse({'message': 'Job successfully added to the user profile.'},status=210)
     else:
         # Handle other HTTP methods if needed
         return JsonResponse({'message': 'Invalid request method.'}, status=400)
+from django.contrib.sessions.models import Session
+from django.contrib.auth import get_user_model
+def get_username_from_session_id(session_id):
+    try:
+        # Retrieve the session from the database
+        session = Session.objects.get(session_key=session_id)
 
+        # Get the user ID from the session data
+        user_id = session.get_decoded().get('_auth_user_id')
+
+        # Get the user object using the user ID
+        user = get_user_model().objects.get(pk=user_id)
+
+        # Get the username from the user object
+        username = user.username
+
+        return username
+    except (Session.DoesNotExist, get_user_model().DoesNotExist, KeyError) as e:
+        # Handle exceptions (e.g., session not found, user not found)
+        return None
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import Job, MyModel
-
 @api_view(['GET'])
 def get_all_jobs(request):
+    session_id = request.COOKIES.get('sessionid')
+    print(session_id)
+    
     user_id = request.user.id
     username = request.user.username
+
+    print(username+'dsd')
+    print('daaa'+request.user.username)
+    # username = get_username_from_session_id(session_id)
     # Get the MyModel instance based on user ID
     user_instance = get_object_or_404(MyModel, username=username)
     print(user_instance.job_ids)
     # Fetch jobs associated with the user using subquery
     jobs = Job.objects.filter(job_id__in=user_instance.job_ids.values('job_id'))
     print(len(jobs))
+    print(jobs[0].role)
     # Create a list to store job details
     jobs_array = []
     for job in jobs:
@@ -352,6 +383,7 @@ def get_all_jobs(request):
             'referred_by': job.referred_by
         }
         jobs_array.append(job_data)
+    print(jobs_array)
 
     # Check if there are jobs, if not, return an empty array
     if not jobs_array:

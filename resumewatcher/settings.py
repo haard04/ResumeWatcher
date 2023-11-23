@@ -66,7 +66,12 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # or your Next.js frontend URL
 ]
-
+CORS_ALLOW_CREDENTIALS = True
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_SECURE = True
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",  # Adjust the origin to match your React app's URL
+]
 ROOT_URLCONF = 'resumewatcher.urls'
 
 TEMPLATES = [
