@@ -86,17 +86,31 @@ def logout(request):
     return response
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])kj
 def get_logged_in_user(request):
-    user = request.user
-    response_data = {
+    session_id = request.COOKIES.get('sessionid')
+    print(session_id)
+    
+    user_id = request.user.id
+    username = request.user.username
+
+    print(username+'dsd')
+    print('daaa'+request.user.username)
+    try:
+        user = request.user
+        response_data = {
         'id': user.id,
         'username': user.username,
         'email': user.email,
         # Add other user details as needed
-    }
-    return Response(response_data)
-
+    
+        }
+        return Response(response_data)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+# kjjjjjjjjj-----
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -272,14 +286,14 @@ from django.contrib.auth.decorators import login_required
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated]) 
 # @login_required
-@csrf_exempt
+# @csrf_exempt
 def add_job_to_profile(request):
     session_id = request.COOKIES.get('sessionid')
     print(session_id)
-    print('request recieved')
-    # Get the authenticated user's MyModel instance
+    
+    user_id = request.user.id
     username = request.user.username
-    print(username)
+    print(username+'aaaa')
     user = get_object_or_404(MyModel, username=username)
 
     if request.method == 'POST':
@@ -294,38 +308,38 @@ def add_job_to_profile(request):
         job_link = request.data.get('job_link')
         referred_by = request.data.get('referred_by')
         print(request.data.get('role'))
-        # Create a new Job instance in the myapp_job table
-        job = Job.objects.create(
-            role=role,
-            company_name=company_name,
-            location=location,
-            stipend_amount=stipend_amount,
-            job_type=job_type,
-            application_date=application_date,
-            status=status,
-            job_link=job_link,
-            referred_by=referred_by
-        )
+#         # Create a new Job instance in the myapp_job table
+#         job = Job.objects.create(
+#             role=role,
+#             company_name=company_name,
+#             location=location,
+#             stipend_amount=stipend_amount,
+#             job_type=job_type,
+#             application_date=application_date,
+#             status=status,
+#             job_link=job_link,
+#             referred_by=referred_by
+#         )
 
-        # Add the Job ID to myapp_mymodel_job_ids table
-        user.job_ids.add(job)
-        print('created')
-        if activeJobs.objects.filter(link=job_link).exists():
-            return JsonResponse({'error': 'Job link already exists.'}, status=205)
-        active_job = activeJobs.objects.create(
-            job_id=job,
-            reports=0,
-            link=job_link
-        )
+#         # Add the Job ID to myapp_mymodel_job_ids table
+#         user.job_ids.add(job)
+#         print('created')
+#         if activeJobs.objects.filter(link=job_link).exists():
+#             return JsonResponse({'error': 'Job link already exists.'}, status=205)
+#         active_job = activeJobs.objects.create(
+#             job_id=job,
+#             reports=0,
+#             link=job_link
+#         )
 
 
-#         # Save both user and job objects
-        # user.save()
-        # job.save()
-        return JsonResponse({'message': 'Job successfully added to the user profile.'},status=210)
-    else:
-        # Handle other HTTP methods if needed
-        return JsonResponse({'message': 'Invalid request method.'}, status=400)
+# #         # Save both user and job objects
+#         # user.save()
+#         # job.save()
+    return JsonResponse({'message': 'Job successfully added to the user profile.'},status=210)
+    # else:
+    #     # Handle other HTTP methods if needed
+    #     return JsonResponse({'message': 'Invalid request method.'}, status=400)
 from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
 def get_username_from_session_id(session_id):
@@ -536,9 +550,9 @@ def getskillsfromdesc(jobdesc):
 from django.shortcuts import get_object_or_404
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated]) 
-@login_required
-@csrf_exempt
+# @permission_classes([IsAuthenticated]) 
+# @login_required
+# @csrf_exempt
 def report_job(request):
 
     if request.method == 'POST':

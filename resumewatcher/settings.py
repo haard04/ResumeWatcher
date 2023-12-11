@@ -33,7 +33,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1:8000',
     '127.0.0.1',
     'bmgrcaf0t7d3hwbfvtcp-mysql.services.clever-cloud.com',
-    'localhost'
+    'localhost',
+    'kubernetes.docker.internal',
+    'kubernetes.docker.internal:8000',
 ]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
